@@ -25,7 +25,7 @@ def clean_row(row):
 def record(stock_id, row):
     ''' Save row to csv file '''
     prefix="data"
-    f = open('../{}/{}.csv'.format(prefix, stock_id), 'a')
+    f = open('../{}/{}.csv'.format(prefix, stock_id.strip()), 'a')
     cw = csv.writer(f, lineterminator='\n')
     cw.writerow(row)
     f.close()
