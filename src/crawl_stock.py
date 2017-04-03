@@ -8,6 +8,7 @@ import re
 import csv
 import logging
 import requests
+import pandas as pd
 from lxml import html
 from datetime import datetime, timedelta
 '''
@@ -29,10 +30,21 @@ def record(stock_id, row):
     cw = csv.writer(f, lineterminator='\n')
     cw.writerow(row)
     f.close()
+#初始化csv檔的column
+def Initialize(Stock_ID):
+    #初始化Stock_ID.csv
+    prefix = "../data"
+    if not os.path.isfile('{}/{}.csv'.format(prefix, Stock_ID.strip())):
+        ''' Save row to csv file '''
+        f = open('{}/{}.csv'.format(prefix, Stock_ID.strip()), 'a', encoding='utf-8-sig')
+        cw = csv.writer(f, lineterminator='\n')
+        csv_Columns = ['日期','成交股數','成交金額','開盤價','最高價','最低價','收盤價','漲跌價差','成交筆數']
+        cw.writerow(csv_Columns)
+        f.close()
 
 #爬Stock_ID這支股票指定日期Day這天的資料
 def Get_TSEdata(Day, Stock_ID):
-    '''Make payload to search the stock priece on the website'''
+    #設定要開始爬的日期轉成民國，再設定網頁中要輸入的選項
     Date_str = '{0}/{1:02d}/{2:02d}'.format(Day.year - 1911, Day.month, Day.day)
     #print(Date_str)
     url = 'http://www.twse.com.tw/ch/trading/exchange/MI_INDEX/MI_INDEX.php'
@@ -44,7 +56,8 @@ def Get_TSEdata(Day, Stock_ID):
     #print(payload)
     # Get html page and parse as tree
     page = requests.post(url, data=payload)
-
+    for ID in Stock_ID:
+        Initialize(ID)
     if not page.ok:
         logging.error("Can not get TSE data at {}".format(Date_str))
     else:
@@ -81,30 +94,30 @@ def Get_TSEdata(Day, Stock_ID):
 '''
 #預設抓台積電(2330)從今天到2004,2,11的資料
 def Get_Stock_DATA(Stock_ID = ["2330"], First_Day = datetime.today(), Last_Day = datetime(2004,2,11)):
-    '''Set Stock_ID that need to crawl'''
+    #Set Stock_ID that need to crawl
     print("Crawl " + str(Stock_ID) + "Stock Data")
-    '''Set logging'''
+    #Set logging
     if not os.path.isdir('../log'):
         os.makedirs('../log')
     logging.basicConfig(filename='../log/crawl-error.log',
         level=logging.ERROR,
         format='%(asctime)s\t[%(levelname)s]\t%(message)s',
         datefmt='%Y/%m/%d %H:%M:%S')
-    ''' Make directory if not exist when initialize '''
+    #Make directory if not exist when initialize
     prefix="../data"
     if not os.path.isdir(prefix):
         os.mkdir(prefix)
         
-    '''The First_Day and Last_Day '''
+    #The First_Day and Last_Day
     Date_str = '{0}/{1:02d}/{2:02d}'.format(First_Day.year - 1911, First_Day.month, First_Day.day)
     print("Start on " + Date_str)
     Date_str = '{0}/{1:02d}/{2:02d}'.format(Last_Day.year - 1911, Last_Day.month, Last_Day.day)
     print("End of " + Date_str)
     
-    '''Set Max_Error to 5'''
+    #Set Max_Error to 5
     Max_Error = 5
     Error_Times = 0
-    '''Crawl stock until Last_Day'''
+    #Crawl stock until Last_Day
     while Error_Times < Max_Error and First_Day >= Last_Day:
         try:
             Get_TSEdata(First_Day, Stock_ID)
@@ -121,6 +134,6 @@ def Get_Stock_DATA(Stock_ID = ["2330"], First_Day = datetime.today(), Last_Day =
     print("Finish")
 
     
-Stock_ID = ["2330"]
+Stock_ID = ["2330","2002"]
 Get_Stock_DATA(Stock_ID, Last_Day = datetime(2017,3,29))
 
