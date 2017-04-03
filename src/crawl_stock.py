@@ -13,12 +13,15 @@ from datetime import datetime, timedelta
 '''
 定義Fuction
 '''
+
+#清除抓到的股票每個欄位中多餘的逗號還有空白
 def clean_row(row):
     ''' Clean comma and spaces '''
     for index, content in enumerate(row):
         row[index] = re.sub(",", "", content.strip())
     return row
 
+#紀錄stock_id這隻股票的資料以append的方式增加在stock_id.csv後面
 def record(stock_id, row):
     ''' Save row to csv file '''
     prefix="data"
@@ -26,6 +29,8 @@ def record(stock_id, row):
     cw = csv.writer(f, lineterminator='\n')
     cw.writerow(row)
     f.close()
+
+#爬Stock_ID這支股票指定日期Day這天的資料
 def Get_TSEdata(Day, Stock_ID):
     '''Make payload to search the stock priece on the website'''
     Date_str = '{0}/{1:02d}/{2:02d}'.format(Day.year - 1911, Day.month, Day.day)
@@ -69,48 +74,53 @@ def Get_TSEdata(Day, Stock_ID):
                     clean_row(row)
                     print(row)
                     record(tds[0], row)
-'''
-抓台積電(2330)從今天到2004,2,11的資料
-'''
-'''Set logging'''
-if not os.path.isdir('../log'):
-    os.makedirs('../log')
-logging.basicConfig(filename='../log/crawl-error.log',
-    level=logging.ERROR,
-    format='%(asctime)s\t[%(levelname)s]\t%(message)s',
-    datefmt='%Y/%m/%d %H:%M:%S')
-''' Make directory if not exist when initialize '''
-prefix="../data"
-if not os.path.isdir(prefix):
-    os.mkdir(prefix)
-    
-    
-    
-'''Set the First_Day and Last_Day '''
-First_Day = datetime.today()
-Last_Day = datetime(2004, 2, 11)
-print(First_Day)
-print(Last_Day)
-'''Set Stock_ID that need to crawl'''
-Stock_ID = ["2330"]
-print(Stock_ID)
 
-
-'''Set Max_Error to 5'''
-Max_Error = 5
-Error_Times = 0
-'''Crawl stock until Last_Day'''
-while Error_Times < Max_Error and First_Day >= Last_Day:
-    try:
-        Get_TSEdata(First_Day, Stock_ID)
-        Error_Times = 0
-    except:
-        '''When crawl data occuring problem add one to Error_Times'''
-        date_str = First_Day.strftime('%Y/%m/%d')
-        logging.error('Crawl raise error {}'.format(date_str))
-        Error_Times += 1
-        continue
-    finally:
-        First_Day -= timedelta(1)
+'''
+抓取Stock_ID在日期範圍(First_Day,Last_Day)內的所有資料
+['日期','成交股數','成交金額','開盤價','最高價','最低價','收盤價','漲跌價差','成交筆數']
+'''
+#預設抓台積電(2330)從今天到2004,2,11的資料
+def Get_Stock_DATA(Stock_ID = ["2330"], First_Day = datetime.today(), Last_Day = datetime(2004,2,11)):
+    '''Set Stock_ID that need to crawl'''
+    print("Crawl " + str(Stock_ID) + "Stock Data")
+    '''Set logging'''
+    if not os.path.isdir('../log'):
+        os.makedirs('../log')
+    logging.basicConfig(filename='../log/crawl-error.log',
+        level=logging.ERROR,
+        format='%(asctime)s\t[%(levelname)s]\t%(message)s',
+        datefmt='%Y/%m/%d %H:%M:%S')
+    ''' Make directory if not exist when initialize '''
+    prefix="../data"
+    if not os.path.isdir(prefix):
+        os.mkdir(prefix)
         
-print("Finish")
+    '''The First_Day and Last_Day '''
+    Date_str = '{0}/{1:02d}/{2:02d}'.format(First_Day.year - 1911, First_Day.month, First_Day.day)
+    print("Start on " + Date_str)
+    Date_str = '{0}/{1:02d}/{2:02d}'.format(Last_Day.year - 1911, Last_Day.month, Last_Day.day)
+    print("End of " + Date_str)
+    
+    '''Set Max_Error to 5'''
+    Max_Error = 5
+    Error_Times = 0
+    '''Crawl stock until Last_Day'''
+    while Error_Times < Max_Error and First_Day >= Last_Day:
+        try:
+            Get_TSEdata(First_Day, Stock_ID)
+            Error_Times = 0
+        except:
+            '''When crawl data occuring problem add one to Error_Times'''
+            date_str = First_Day.strftime('%Y/%m/%d')
+            logging.error('Crawl raise error {}'.format(date_str))
+            Error_Times += 1
+            continue
+        finally:
+            First_Day -= timedelta(1)
+            
+    print("Finish")
+
+    
+Stock_ID = ["2330"]
+Get_Stock_DATA(Stock_ID, Last_Day = datetime(2017,3,29))
+
