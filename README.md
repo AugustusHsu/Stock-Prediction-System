@@ -1,5 +1,5 @@
 # 股票預測系統
->[name=AugustusHsu]
+用歷史股票資料當作input建立簡單的LSTM預測模型來預測股票
 ## 抓股票程式
 crawl_stock.py|內容
 ---|---
