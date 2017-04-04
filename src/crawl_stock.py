@@ -120,20 +120,21 @@ def Get_Stock_DATA(Stock_ID = ["2330"], First_Day = datetime.today(), Last_Day =
     #Crawl stock until Last_Day
     while Error_Times < Max_Error and First_Day >= Last_Day:
         try:
-            Get_TSEdata(First_Day, Stock_ID)
+            Get_TSEdata(Last_Day, Stock_ID)
             Error_Times = 0
         except:
             '''When crawl data occuring problem add one to Error_Times'''
-            date_str = First_Day.strftime('%Y/%m/%d')
+            date_str = Last_Day.strftime('%Y/%m/%d')
             logging.error('Crawl raise error {}'.format(date_str))
             Error_Times += 1
             continue
         finally:
-            First_Day -= timedelta(1)
+            Last_Day += timedelta(1)
             
     print("Finish")
 
     
 Stock_ID = ["2330","2002"]
-Get_Stock_DATA(Stock_ID, Last_Day = datetime(2017,3,29))
+#Stock_ID = ["2332"]
+Get_Stock_DATA(Stock_ID,Last_Day = datetime.today() - timedelta(365))
 
