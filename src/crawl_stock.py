@@ -8,7 +8,6 @@ import re
 import csv
 import logging
 import requests
-import pandas as pd
 from lxml import html
 from datetime import datetime, timedelta
 '''
