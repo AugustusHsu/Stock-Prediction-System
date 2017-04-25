@@ -28,7 +28,7 @@ def Graphical_Stock_DATA(PNGname,y):
     plt.savefig(savefigpath,dpi=500,format="png") 
     plt.clf()
 
-Stock_ID = ["2330","2002"]
+Stock_ID = ["2330","2002","3008"]
 for ID in Stock_ID:
     filepath = "../data/" + ID + ".csv"
     print(filepath)

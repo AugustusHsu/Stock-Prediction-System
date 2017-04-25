@@ -133,7 +133,8 @@ def Get_Stock_DATA(Stock_ID = ["2330"], First_Day = datetime.today(), Last_Day =
     print("Finish")
 
     
-Stock_ID = ["2330","2002"]
+Stock_ID = ["2330","2002","3008"]
 #Stock_ID = ["2332"]
-Get_Stock_DATA(Stock_ID,Last_Day = datetime.today() - timedelta(365))
+#Get_Stock_DATA(Stock_ID,Last_Day = datetime.today() - timedelta(365))
+Get_Stock_DATA(Stock_ID)
 
