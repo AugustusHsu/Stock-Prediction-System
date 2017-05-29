@@ -60,7 +60,7 @@ def normalise_windows(window_data):
     return normalised_data
 
 #建立訓練模型
-def build_model(layers):
+def build_model(layers,loss_choose="mse",optimizer_choose="rmsprop"):
     model = Sequential()
 
     model.add(LSTM( input_dim=layers[0],
@@ -75,7 +75,7 @@ def build_model(layers):
     model.add(Activation("linear"))
 
     start = time.time()
-    model.compile(loss="mse", optimizer="rmsprop")
+    model.compile(loss=loss_choose, optimizer=optimizer_choose)
     print("> Compilation Time : ", time.time() - start)
     return model
 
