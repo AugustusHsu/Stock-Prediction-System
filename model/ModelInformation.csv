@@ -1,0 +1,3 @@
+,NormalizeWindowList,WindowSizeList,LayerList,BatchSizeList,EpochList,ValidationSplitList,OptimizersList,LossList,StoredModelName
+0,False,50,"[1, 50, 100, 1]",512,1,0.1,adam,mse,0
+1,True,50,"[1, 50, 100, 1]",512,1,0.1,adam,mse,1

@@ -1,5 +1,5 @@
 '''
-參考https://github.com/jimhsu123456/tsec
+參考https://github.com/Asoul/tsec
 '''
 ## -*- coding: utf-8 -*-
 #-*- coding: cp950 -*-
@@ -8,7 +8,7 @@ import re
 import csv
 import logging
 import requests
-from lxml import html
+import time
 from datetime import datetime, timedelta
 '''
 定義Fuction
@@ -37,55 +37,58 @@ def Initialize(Stock_ID):
         ''' Save row to csv file '''
         f = open('{}/{}.csv'.format(prefix, Stock_ID.strip()), 'a', encoding='utf-8-sig')
         cw = csv.writer(f, lineterminator='\n')
-        csv_Columns = ['日期','成交股數','成交金額','開盤價','最高價','最低價','收盤價','漲跌價差','成交筆數']
+        csv_Columns = ['日期','成交股數','成交金額','開盤價','最高價','最低價','收盤價','漲跌價差','成交筆數','最後揭示買價','最後揭示賣價',]
         cw.writerow(csv_Columns)
         f.close()
-
+        
 #爬Stock_ID這支股票指定日期Day這天的資料
 def Get_TSEdata(Day, Stock_ID):
     #設定要開始爬的日期轉成民國，再設定網頁中要輸入的選項
-    Date_str = '{0}/{1:02d}/{2:02d}'.format(Day.year - 1911, Day.month, Day.day)
+    Date_str = '{0}{1:02d}{2:02d}'.format(Day.year, Day.month, Day.day)
+    Store_time = '{0}-{1:02d}-{2:02d}'.format(Day.year, Day.month, Day.day)
     #print(Date_str)
-    url = 'http://www.twse.com.tw/ch/trading/exchange/MI_INDEX/MI_INDEX.php'
-    payload = {
-        'download': '',
-        'qdate': Date_str,
-        'selectType': 'ALL'
+    url = 'http://www.twse.com.tw/exchangeReport/MI_INDEX'
+    query_params = {
+        'date': Date_str,
+        'response': 'json',
+        'type': 'ALL',
+        '_': str(round(time.time() * 1000) - 500)
     }
-    #print(payload)
-    # Get html page and parse as tree
-    page = requests.post(url, data=payload)
+    # Get json data
+    page = requests.get(url, params=query_params)
     for ID in Stock_ID:
         Initialize(ID)
     if not page.ok:
         logging.error("Can not get TSE data at {}".format(Date_str))
     else:
         # Parse page
-        tree = html.fromstring(page.text)
-
-        for tr in tree.xpath('//table[2]/tbody/tr'):
-            tds = tr.xpath('td/text()')
-            for ID in Stock_ID:
-                if str(tds[0]).strip() == ID:
-                    #print(2330)
-                    sign = tr.xpath('td/font/text()')
-                    sign = '-' if len(sign) == 1 and sign[0] == u'－' else ''
-    
-                    row = [
-                        Date_str, # 日期
-                        str(tds[2]), # 成交股數
-                        str(tds[4]), # 成交金額
-                        str(tds[5]), # 開盤價
-                        str(tds[6]), # 最高價
-                        str(tds[7]), # 最低價
-                        str(tds[8]), # 收盤價
-                        str(sign + tds[9]), # 漲跌價差
-                        str(tds[3]),  # 成交筆數  
-                    ]
-                    #print(row)
-                    clean_row(row)
-                    print(row)
-                    record(tds[0], row)
+        content = page.json()
+        #print(content)
+        for attri in content:
+            #print(attri)
+            if attri == 'data5' or attri == 'data4' or attri == 'data3' or  attri == 'data2' or attri == 'data1':
+                for data in content[attri]:
+                    for ID in Stock_ID:
+                        if str(data[0]).strip() == ID:
+                            sign = '-' if data[9].find('green') > 0 else ''
+                            #print(data)
+                            row = [
+                                Store_time, # 日期
+                                data[2], # 成交股數
+                                data[4], # 成交金額
+                                data[5], # 開盤價
+                                data[6], # 最高價
+                                data[7], # 最低價
+                                data[8], # 收盤價
+                                sign + data[10], # 漲跌價差
+                                data[3], # 成交筆數
+                                data[11],#最後揭示買價
+                                data[13],#最後揭示賣價
+                            ]
+                            #print(row)
+                            clean_row(row)
+                            print(row)
+                            record(data[0], row)
 
 '''
 抓取Stock_ID在日期範圍(First_Day,Last_Day)內的所有資料
@@ -99,19 +102,23 @@ def Get_Stock_DATA(Stock_ID = ["2330"], First_Day = datetime.today(), Last_Day =
     if not os.path.isdir('../log'):
         os.makedirs('../log')
     logging.basicConfig(filename='../log/crawl-error.log',
-        level=logging.ERROR,
-        format='%(asctime)s\t[%(levelname)s]\t%(message)s',
-        datefmt='%Y/%m/%d %H:%M:%S')
+                        level=logging.ERROR,
+                        format='%(asctime)s\t[%(levelname)s]\t%(message)s',
+                        datefmt='%Y/%m/%d %H:%M:%S')
     #Make directory if not exist when initialize
-    prefix="../data"
+    prefix='../data'
     if not os.path.isdir(prefix):
         os.mkdir(prefix)
         
     #The First_Day and Last_Day
     Date_str = '{0}/{1:02d}/{2:02d}'.format(First_Day.year - 1911, First_Day.month, First_Day.day)
+    CE_Date_str = '{0}/{1:02d}/{2:02d}'.format(First_Day.year, First_Day.month, First_Day.day)
     print("Start on " + Date_str)
+    print("Start on " + CE_Date_str)
     Date_str = '{0}/{1:02d}/{2:02d}'.format(Last_Day.year - 1911, Last_Day.month, Last_Day.day)
+    CE_Date_str = '{0}/{1:02d}/{2:02d}'.format(Last_Day.year, Last_Day.month, Last_Day.day)
     print("End of " + Date_str)
+    print("End of " + CE_Date_str)
     
     #Set Max_Error to 5
     Max_Error = 5
@@ -131,10 +138,13 @@ def Get_Stock_DATA(Stock_ID = ["2330"], First_Day = datetime.today(), Last_Day =
             Last_Day += timedelta(1)
             
     print("Finish")
-
     
-Stock_ID = ["2330","2002","3008"]
+Stock_ID = ["2330","2002","3008",'2332']
+#print(len(Stock_ID))
 #Stock_ID = ["2332"]
-#Get_Stock_DATA(Stock_ID,Last_Day = datetime.today() - timedelta(365))
-Get_Stock_DATA(Stock_ID)
-
+#datetime(2004,2,11) data2
+#datetime(2009,1,5) data4
+#datetime(2011,8,1) data5
+Get_Stock_DATA(Stock_ID, Last_Day = datetime.today() - timedelta(10))
+#Get_Stock_DATA(Stock_ID=Stock_ID)
+#Get_TSEdata(datetime(2009,1,5), ['3008'])

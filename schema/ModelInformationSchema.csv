@@ -1,0 +1,9 @@
+,Name,Description,Sample
+0,NormalizeWindowList,是否正規化資料,"False,True"
+1,WindowSizeList,每個window的大小,50
+2,LayerList,神經網路的層數,"[1,50,100,1]"
+3,BatchSizeList,訓練時Batch的大小,512
+4,EpochList,訓練幾次,1
+5,ValidationSplitList,驗證集大小,0.1
+6,OptimizersList,優化器的選擇,adam
+7,LossList,Loss Function的選擇,mse
