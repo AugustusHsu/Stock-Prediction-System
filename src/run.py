@@ -111,7 +111,6 @@ for NormalizeWindow in NormalizeWindowList:
                                 ModelInformation.iloc[count,6] = Optimizers
                                 ModelInformation.iloc[count,7] = Loss
                                 ModelInformation.iloc[count,8] = count
-                                count += 1
                                 ModelInformation.to_csv('../model/ModelInformation.csv')
                                 ModelInformation
                                 
@@ -142,6 +141,9 @@ for NormalizeWindow in NormalizeWindowList:
                                         batch_size=BatchSize,
                                         nb_epoch=Epoch,
                                         validation_split=ValidationSplit)
+                                    
+                                    #HDF5, pip3
+                                    model.save('../model/'+str(count)+'.h5')
                                     
                                     #預測
                                     predictions = lstm.predict_sequences_multiple(model, X_test, seq_len, 50)

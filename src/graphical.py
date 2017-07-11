@@ -25,7 +25,7 @@ def Graphical_Stock_DATA(PNGname,y):
         # 如果要存成圖形檔:
         # 把 pyplot.show() 換成下面這行:
     savefigpath = "../grp/" + PNGname + ".png"
-    plt.savefig(savefigpath,dpi=500,format="png") 
+    plt.savefig(savefigpath,dpi=1000,format="png") 
     plt.clf()
 
 Stock_ID = ["2330","2002","3008"]
@@ -33,5 +33,5 @@ for ID in Stock_ID:
     filepath = "../data/" + ID + ".csv"
     print(filepath)
     df = pd.read_csv(filepath)
-    y = df['收盤價']
+    y = df['收盤價'].iloc[:365]
     Graphical_Stock_DATA(ID,y)
