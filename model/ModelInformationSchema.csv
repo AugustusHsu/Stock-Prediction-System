@@ -1,0 +1,12 @@
+,Name,Description,Sample
+0,FileName,檔案名稱,"2002.csv,3008.csv"
+1,ColumnList,選擇的Column,"[""成交股數"",""成交金額"",""成交筆數"",""開盤價"",""最後揭示買價"",""最後揭示賣價"",""收盤價""]"
+2,WindowSize,以過去幾天的資料去做訓練、預測,50
+3,NumOfPredictDay,要預測的天數,"1,7,10,30"
+4,Layer,神經網路的層數,"[len(ColumnList), 50, 100,NumOfPredictDay]"
+5,Loss,Loss Function的選擇,mse
+6,Optimizer,優化器的選擇,adam
+7,BatchSize,驗證集比例,0.1
+8,Epoch,訓練時Batch的大小,512
+9,ValidationSplit,訓練幾次,10
+10,ModelName,儲存Model的名稱,"0.h5,1.h5,2.h5"
