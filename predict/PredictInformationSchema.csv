@@ -1,0 +1,5 @@
+,Name,Description,Sample
+0,FileName,檔案名稱,"2002.csv,3008.csv"
+1,WindowSize,以過去幾天的資料去做訓練,50
+2,NumOfPredictDay,要預測的天數,"1,7,10,30"
+3,PredictCSVName,儲存Predict結果的CSV名稱,"0.csv,1.csv,2.csv"

@@ -101,7 +101,7 @@ def Get_TSEdata(Day, Stock_ID):
 #預設抓台積電(2330)從今天到2004,2,11的資料
 def Get_Stock_DATA(Stock_ID = ["2330"], First_Day = datetime.today(), Last_Day = datetime(2004,2,11)):
     #Set Stock_ID that need to crawl
-    print("Crawl " + str(Stock_ID) + "Stock Data")
+    print("Crawl " + str(Stock_ID) + " Stock Data")
     #Set logging
     if not os.path.isdir('../log'):
         os.makedirs('../log')
@@ -114,6 +114,11 @@ def Get_Stock_DATA(Stock_ID = ["2330"], First_Day = datetime.today(), Last_Day =
     if not os.path.isdir(prefix):
         os.mkdir(prefix)
         
+    #當Stock_ID為空不執行
+    if Stock_ID == []:
+        print("Nothing to crawl")
+        return
+    
     #The First_Day and Last_Day
     Date_str = '{0}/{1:02d}/{2:02d}'.format(First_Day.year - 1911, First_Day.month, First_Day.day)
     CE_Date_str = '{0}/{1:02d}/{2:02d}'.format(First_Day.year, First_Day.month, First_Day.day)
@@ -208,6 +213,6 @@ def CheckCSV(Stock_ID):
 #Get_Stock_DATA(Stock_ID, Last_Day = datetime.today() - timedelta(10))
 #Get_Stock_DATA(Stock_ID=Stock_ID)
 #Get_TSEdata(datetime(2009,1,5), ['3008'])
-DailyUpdate()
-Stock_ID = ["2330","2002","3008",'2332','12','123']
-CrawlID = CheckCSV(Stock_ID)
+#DailyUpdate()
+#Stock_ID = ["2330","2002","3008",'2332','12','123']
+#CrawlID = CheckCSV(Stock_ID)
