@@ -95,8 +95,8 @@ def SplitDatatoTrain(DataSet, ColumnList, NumOfPredictDay):
     y_train = train[:, -1*NumOfPredictDay:,len(ColumnList)-1:len(ColumnList)]
     
     y_train = np.reshape(y_train, (y_train.shape[0], y_train.shape[1]))
-    print(x_train.shape)
-    print(y_train.shape)
+    '''print(x_train.shape)
+    print(y_train.shape)'''
     
     return [x_train, y_train]
 
@@ -110,7 +110,7 @@ def SplitDatatoPredict(DataSet, ColumnList, NumOfPredictDay):
     x_test = predict[NumOfPredictDay:]
     
     x_test = np.reshape(x_test, (1, x_test.shape[0], x_test.shape[1]))
-    print(x_test.shape)
+    #print(x_test.shape)
     
     return x_test
 
@@ -134,10 +134,10 @@ def SplitDatatoTest(DataSet, ColumnList, NumOfPredictDay):
     x_test = np.reshape(x_test, (1, x_test.shape[0], x_test.shape[1]))
     y_train = np.reshape(y_train, (y_train.shape[0], y_train.shape[1]))
     y_test = np.reshape(y_test, (y_test.shape[0], y_test.shape[1]))
-    print(x_train.shape)
+    '''print(x_train.shape)
     print(y_train.shape)
     print(x_test.shape)
-    print(y_test.shape)
+    print(y_test.shape)'''
     
     return [x_train, y_train, x_test, y_test]
 

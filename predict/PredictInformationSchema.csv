@@ -1,5 +1,5 @@
 ,Name,Description,Sample
-0,FileName,æª”æ¡ˆåç¨±,"2002.csv,3008.csv"
-1,WindowSize,ä»¥éå»å¹¾å¤©çš„è³‡æ–™å»åšè¨“ç·´,50
-2,NumOfPredictDay,è¦é æ¸¬çš„å¤©æ•¸,"1,7,10,30"
-3,PredictCSVName,å„²å­˜Predictçµæœçš„CSVåç¨±,"0.csv,1.csv,2.csv"
+0,FileName,ÀÉ®×¦WºÙ,"2002.csv,3008.csv"
+1,WindowSize,¥H¹L¥h´X¤Ñªº¸ê®Æ¥h°µ°V½m,50
+2,NumOfPredictDay,­n¹w´úªº¤Ñ¼Æ,"1,7,10,30"
+3,PredictCSVName,Àx¦sPredictµ²ªGªºCSV¦WºÙ,"0.csv,1.csv,2.csv"

@@ -1,12 +1,12 @@
 ,Name,Description,Sample
-0,FileName,æª”æ¡ˆåç¨±,"2002.csv,3008.csv"
-1,ColumnList,é¸æ“‡çš„Column,"[""æˆäº¤è‚¡æ•¸"",""æˆäº¤é‡‘é¡"",""æˆäº¤ç­†æ•¸"",""é–‹ç›¤åƒ¹"",""æœ€å¾Œæ­ç¤ºè²·åƒ¹"",""æœ€å¾Œæ­ç¤ºè³£åƒ¹"",""æ”¶ç›¤åƒ¹""]"
-2,WindowSize,ä»¥éå»å¹¾å¤©çš„è³‡æ–™å»åšè¨“ç·´ã€é æ¸¬,50
-3,NumOfPredictDay,è¦é æ¸¬çš„å¤©æ•¸,"1,7,10,30"
-4,Layer,ç¥ç¶“ç¶²è·¯çš„å±¤æ•¸,"[len(ColumnList), 50, 100,NumOfPredictDay]"
-5,Loss,Loss Functionçš„é¸æ“‡,mse
-6,Optimizer,å„ªåŒ–å™¨çš„é¸æ“‡,adam
-7,BatchSize,é©—è­‰é›†æ¯”ä¾‹,0.1
-8,Epoch,è¨“ç·´æ™‚Batchçš„å¤§å°,512
-9,ValidationSplit,è¨“ç·´å¹¾æ¬¡,10
-10,ModelName,å„²å­˜Modelçš„åç¨±,"0.h5,1.h5,2.h5"
+0,FileName,ÀÉ®×¦WºÙ,"2002.csv,3008.csv"
+1,ColumnList,¿ï¾ÜªºColumn,"[""¦¨¥æªÑ¼Æ"",""¦¨¥æª÷ÃB"",""¦¨¥æµ§¼Æ"",""¶}½L»ù"",""³Ì«á´¦¥Ü¶R»ù"",""³Ì«á´¦¥Ü½æ»ù"",""¦¬½L»ù""]"
+2,WindowSize,¥H¹L¥h´X¤Ñªº¸ê®Æ¥h°µ°V½m¡B¹w´ú,50
+3,NumOfPredictDay,­n¹w´úªº¤Ñ¼Æ,"1,7,10,30"
+4,Layer,¯«¸gºô¸ôªº¼h¼Æ,"[len(ColumnList), 50, 100,NumOfPredictDay]"
+5,Loss,Loss Functionªº¿ï¾Ü,mse
+6,Optimizer,Àu¤Æ¾¹ªº¿ï¾Ü,adam
+7,BatchSize,ÅçÃÒ¶°¤ñ¨Ò,0.1
+8,Epoch,°V½m®ÉBatchªº¤j¤p,512
+9,ValidationSplit,°V½m´X¦¸,10
+10,ModelName,Àx¦sModelªº¦WºÙ,"0.h5,1.h5,2.h5"
