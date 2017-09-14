@@ -15,14 +15,14 @@ from datetime import datetime, timedelta
 '''
 定義Fuction
 '''
-
+from dateutil.relativedelta import relativedelta
+import requests
 #清除抓到的股票每個欄位中多餘的逗號還有空白
 def clean_row(row):
     ''' Clean comma and spaces '''
     for index, content in enumerate(row):
         row[index] = re.sub(",", "", content.strip())
     return row
-
 #紀錄stock_id這隻股票的資料以append的方式增加在stock_id.csv後面
 def record(stock_id, row):
     ''' Save row to csv file '''
@@ -31,7 +31,6 @@ def record(stock_id, row):
     cw = csv.writer(f, lineterminator='\n')
     cw.writerow(row)
     f.close()
-    
 #初始化csv檔的column
 def Initialize(Stock_ID):
     #初始化Stock_ID.csv
@@ -41,65 +40,55 @@ def Initialize(Stock_ID):
         f = open('{}/{}.csv'.format(prefix, Stock_ID.strip()), 'a', encoding='utf-8-sig')
         cw = csv.writer(f, lineterminator='\n')
         csv_Columns = ['日期','成交股數','成交金額','開盤價','最高價','最低價',
-                       '收盤價','漲跌價差','成交筆數','最後揭示買價','最後揭示賣價',]
+                       '收盤價','漲跌價差','成交筆數',]
         cw.writerow(csv_Columns)
         f.close()
-        
-#爬Stock_ID這支股票指定日期Day這天的資料
+#爬Stock_ID這支股票指定日期Day這個月的資料
 def Get_TSEdata(Day, Stock_ID):
-    #設定網頁中要輸入的選項，再設定要儲存的日期格式
     Date_str = '{0}{1:02d}{2:02d}'.format(Day.year, Day.month, Day.day)
-    Store_time = '{0}-{1:02d}-{2:02d}'.format(Day.year, Day.month, Day.day)
-    #print(Date_str)
-    url = 'http://www.twse.com.tw/exchangeReport/MI_INDEX'
+    url = 'http://www.twse.com.tw/exchangeReport/STOCK_DAY'
     query_params = {
         'date': Date_str,
         'response': 'json',
-        'type': 'ALL',
-        '_': str(round(time.time() * 1000) - 500)
+        'stockNo': Stock_ID,
     }
     # Get json data
     page = requests.get(url, params=query_params)
-    for ID in Stock_ID:
-        Initialize(ID)
+    
     if not page.ok:
-        logging.error("Can not get TSE data at {}".format(Date_str))
+        logging.error("Can not get TSE data {} at {}".format(Stock_ID,Date_str))
     else:
         # Parse page
         content = page.json()
-        #print(content)
         for attri in content:
-            #print(attri)
-            if attri == 'data5' or attri == 'data4' or attri == 'data3' or  attri == 'data2' or attri == 'data1':
-                for data in content[attri]:
-                    for ID in Stock_ID:
-                        if str(data[0]).strip() == ID:
-                            sign = '-' if data[9].find('green') > 0 else ''
-                            #print(data)
-                            row = [
-                                Store_time, # 日期
-                                data[2], # 成交股數
-                                data[4], # 成交金額
-                                data[5], # 開盤價
-                                data[6], # 最高價
-                                data[7], # 最低價
-                                data[8], # 收盤價
-                                sign + data[10], # 漲跌價差
-                                data[3], # 成交筆數
-                                data[11],#最後揭示買價
-                                data[13],#最後揭示賣價
-                            ]
-                            #print(row)
-                            clean_row(row)
-                            print(row)
-                            record(data[0], row)
-
+            if attri == 'data':
+                for data in content['data']:
+                    if data[0][3] == '/':
+                        year = int(data[0][0:3]) + 1911
+                    month = data[0][4:6]
+                    day = data[0][7:9]
+                    Store_time = '{0}-{1}-{2}'.format(year, month, day)
+                    row = [
+                        Store_time, # 日期
+                        data[1], # 成交股數
+                        data[2], # 成交金額
+                        data[3], # 開盤價
+                        data[4], # 最高價
+                        data[5], # 最低價
+                        data[6], # 收盤價
+                        data[7], # 漲跌價差
+                        data[8], # 成交筆數
+                    ]
+                    #print(row)
+                    clean_row(row)
+                    #print(row)
+                    record(Stock_ID, row)
 '''
 抓取Stock_ID在日期範圍(First_Day,Last_Day)內的所有資料
-['日期','成交股數','成交金額','開盤價','最高價','最低價','收盤價','漲跌價差','成交筆數','最後揭示買價','最後揭示賣價']
+['日期','成交股數','成交金額','開盤價','最高價','最低價','收盤價','漲跌價差','成交筆數']
 '''
-#預設抓台積電(2330)從今天到2004,2,11的資料
-def Get_Stock_DATA(Stock_ID = ["2330"], First_Day = datetime.today(), Last_Day = datetime(2004,2,11)):
+#預設抓台積電(2330)從今天到1991,1,1的資料
+def Get_Stock_DATA(Stock_ID = ["2330"], First_Day = datetime.today(), Last_Day = datetime(1992,1,1)):
     #Set Stock_ID that need to crawl
     print("Crawl " + str(Stock_ID) + " Stock Data")
     #Set logging
@@ -118,43 +107,88 @@ def Get_Stock_DATA(Stock_ID = ["2330"], First_Day = datetime.today(), Last_Day =
     if Stock_ID == []:
         print("Nothing to crawl")
         return
-    
-    #The First_Day and Last_Day
-    Date_str = '{0}/{1:02d}/{2:02d}'.format(First_Day.year - 1911, First_Day.month, First_Day.day)
-    CE_Date_str = '{0}/{1:02d}/{2:02d}'.format(First_Day.year, First_Day.month, First_Day.day)
-    print("Start on " + Date_str)
-    print("Start on " + CE_Date_str)
-    Date_str = '{0}/{1:02d}/{2:02d}'.format(Last_Day.year - 1911, Last_Day.month, Last_Day.day)
-    CE_Date_str = '{0}/{1:02d}/{2:02d}'.format(Last_Day.year, Last_Day.month, Last_Day.day)
-    print("End of " + Date_str)
-    print("End of " + CE_Date_str)
-    
-    #Set Max_Error to 5
-    Max_Error = 5
-    Error_Times = 0
-    #Crawl stock until Last_Day
-    while Error_Times < Max_Error and First_Day >= Last_Day:
-        try:
-            Get_TSEdata(Last_Day, Stock_ID)
-            Error_Times = 0
-        except:
-            '''When crawl data occuring problem add one to Error_Times'''
-            date_str = Last_Day.strftime('%Y/%m/%d')
-            logging.error('Crawl raise error {}'.format(date_str))
-            Error_Times += 1
-            continue
-        finally:
-            Last_Day += timedelta(1)
-            
-    print("Finish")
+    #針對每個Stock_ID去做初始化有就略過沒有就做
+    for ID in Stock_ID:
+        Initialize(ID)
+        #The First_Day and Last_Day
+        ROC_Date_str = '{0}/{1:02d}/{2:02d}'.format(Last_Day.year - 1911, Last_Day.month, Last_Day.day)
+        Date_str = '{0}/{1:02d}/{2:02d}'.format(Last_Day.year, Last_Day.month, Last_Day.day)
+        print("Start on " + ROC_Date_str)
+        print("Start on " + Date_str)
+        ROC_Date_str = '{0}/{1:02d}/{2:02d}'.format(First_Day.year - 1911, First_Day.month, First_Day.day)
+        Date_str = '{0}/{1:02d}/{2:02d}'.format(First_Day.year, First_Day.month, First_Day.day)
+        print("End of " + ROC_Date_str)
+        print("End of " + Date_str)
 
+        #Set Max_Error to 5
+        Max_Error = 5
+        Error_Times = 0
+        #Crawl stock until Last_Day
+        while Error_Times < Max_Error and First_Day >= Last_Day:
+            try:
+                print('抓取{0} 第{1:02d}年{2:02d}月'.format(ID, Last_Day.year, Last_Day.month))
+                Get_TSEdata(Last_Day, ID)
+                time.sleep(0.1)
+                Error_Times = 0
+            except:
+                '''When crawl data occuring problem add one to Error_Times'''
+                date_str = Last_Day.strftime('%Y/%m/%d')
+                logging.error('Crawl raise error {}'.format(date_str))
+                Error_Times += 1
+                continue
+            finally:
+                Last_Day += relativedelta(months=1)
+        Last_Day = datetime(1992,1,1)
+        print("Finish")
+#爬Stock_ID這支股票指定日期Day這個月的資料
+def Get_Stock_Data_by_Day(Day, Stock_ID):
+    Date_str = '{0}{1:02d}{2:02d}'.format(Day.year, Day.month, Day.day)
+    url = 'http://www.twse.com.tw/exchangeReport/STOCK_DAY'
+    query_params = {
+        'date': Date_str,
+        'response': 'json',
+        'stockNo': Stock_ID,
+    }
+    # Get json data
+    page = requests.get(url, params=query_params)
+    
+    if not page.ok:
+        logging.error("Can not get TSE data {} at {}".format(Stock_ID,Date_str))
+    else:
+        # Parse page
+        content = page.json()
+        for attri in content:
+            if attri == 'data':
+                for data in content['data']:
+                    if data[0][3] == '/':
+                        year = int(data[0][0:3]) + 1911
+                    month = data[0][4:6]
+                    day = data[0][7:9]
+                    Date = datetime(year, int(month), int(day))
+                    if Day == Date:
+                        Store_time = '{0}-{1}-{2}'.format(year, month, day)
+                        row = [
+                            Store_time, # 日期
+                            data[1], # 成交股數
+                            data[2], # 成交金額
+                            data[3], # 開盤價
+                            data[4], # 最高價
+                            data[5], # 最低價
+                            data[6], # 收盤價
+                            data[7], # 漲跌價差
+                            data[8], # 成交筆數
+                        ]
+                        #print(row)
+                        clean_row(row)
+                        print(row)
+                        record(Stock_ID, row)
 #每日更新，去讀取資料夾內的StockID更新
 def DailyUpdate():
     #找../data裡面有的股票資料去更新
     DataList = os.listdir("../data")
-    print(DataList[2:])
+    print(DataList[0:-2])
     print("Update...")
-    for CSV in DataList[2:]:
+    for CSV in DataList[0:-2]:
         #讀檔去找最後一筆的日期
         print("{}".format(CSV[:-4]))
         df = pd.read_csv("../data/{}.csv".format(CSV[:-4]))
@@ -175,22 +209,25 @@ def DailyUpdate():
             Today_str = '{0}/{1:02d}/{2:02d}'.format(Today.year, Today.month, Today.day)
             print("From {} to {} (Today)".format(LastUpdate_str, Today_str))
             
-            #最多Error 5次
-            Max_Error = 5
-            Error_Times = 0
-            #Crawl stock until Last_Day
-            while Error_Times < Max_Error and Today >= LastUpdate:
-                try:
-                    Get_TSEdata(LastUpdate, Stock_ID)
-                    Error_Times = 0
-                except:
-                    #When crawl data occuring problem add one to Error_Times
-                    date_str = LastUpdate.strftime('%Y/%m/%d')
-                    logging.error('Crawl raise error {}'.format(date_str))
-                    Error_Times += 1
-                    continue
-                finally:
-                    LastUpdate += timedelta(1)
+            for ID in Stock_ID:
+                #最多Error 5次
+                Max_Error = 5
+                Error_Times = 0
+                #Crawl stock until Last_Day
+                while Error_Times < Max_Error and Today >= LastUpdate:
+                    try:
+                        print('抓取{0} 第{1:02d}年{2:02d}月{3:02d}日'.format(ID, LastUpdate.year, LastUpdate.month, LastUpdate.day))
+                        Get_Stock_Data_by_Day(LastUpdate, ID)
+                        time.sleep(0.1)
+                        Error_Times = 0
+                    except:
+                        #When crawl data occuring problem add one to Error_Times
+                        date_str = LastUpdate.strftime('%Y/%m/%d')
+                        logging.error('Crawl raise error {}'.format(date_str))
+                        Error_Times += 1
+                        continue
+                    finally:
+                        LastUpdate += timedelta(1)
         else:
             print("Nothing to Update")
 
@@ -203,7 +240,6 @@ def CheckCSV(Stock_ID):
             CrawlID.append(ID)
     #Get_Stock_DATA(CrawlID)
     return CrawlID
-
 
 #Stock_ID = ["2330","2002","3008",'2332']
 #Stock_ID = ["2332"]

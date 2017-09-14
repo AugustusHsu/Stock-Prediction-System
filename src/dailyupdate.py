@@ -1,0 +1,3 @@
+import CrawlStock
+
+CrawlStock.DailyUpdate()
