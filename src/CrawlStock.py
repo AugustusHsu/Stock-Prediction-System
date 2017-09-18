@@ -39,7 +39,7 @@ def Initialize(Stock_ID):
         ''' Save row to csv file '''
         f = open('{}/{}.csv'.format(prefix, Stock_ID.strip()), 'a', encoding='utf-8-sig')
         cw = csv.writer(f, lineterminator='\n')
-        csv_Columns = ['日期','成交股數','成交金額','開盤價','最高價','最低價',
+        csv_Columns = ['日期','時間戳','成交股數','成交金額','開盤價','最高價','最低價',
                        '收盤價','漲跌價差','成交筆數',]
         cw.writerow(csv_Columns)
         f.close()
@@ -68,8 +68,15 @@ def Get_TSEdata(Day, Stock_ID):
                     month = data[0][4:6]
                     day = data[0][7:9]
                     Store_time = '{0}-{1}-{2}'.format(year, month, day)
+                    timeArray = time.strptime(Store_time, "%Y-%m-%d")
+                    timeStamp = int(time.mktime(timeArray))
+                    #漲跌價差x,+,-
+                    pattern = r'-*[0-9]*\.[0-9]*'
+                    search = re.search(pattern,data[7])
+                    data[7] = search.group()
                     row = [
                         Store_time, # 日期
+                        str(timeStamp), #時間戳
                         data[1], # 成交股數
                         data[2], # 成交金額
                         data[3], # 開盤價
@@ -85,7 +92,7 @@ def Get_TSEdata(Day, Stock_ID):
                     record(Stock_ID, row)
 '''
 抓取Stock_ID在日期範圍(First_Day,Last_Day)內的所有資料
-['日期','成交股數','成交金額','開盤價','最高價','最低價','收盤價','漲跌價差','成交筆數']
+['日期','時間戳','成交股數','成交金額','開盤價','最高價','最低價','收盤價','漲跌價差','成交筆數',]
 '''
 #預設抓台積電(2330)從今天到1991,1,1的資料
 def Get_Stock_DATA(Stock_ID = ["2330"], First_Day = datetime.today(), Last_Day = datetime(1992,1,1)):
@@ -134,6 +141,7 @@ def Get_Stock_DATA(Stock_ID = ["2330"], First_Day = datetime.today(), Last_Day =
                 '''When crawl data occuring problem add one to Error_Times'''
                 date_str = Last_Day.strftime('%Y/%m/%d')
                 logging.error('Crawl raise error {}'.format(date_str))
+                print('Crawl raise error {}'.format(date_str))
                 Error_Times += 1
                 continue
             finally:
@@ -167,8 +175,15 @@ def Get_Stock_Data_by_Day(Day, Stock_ID):
                     Date = datetime(year, int(month), int(day))
                     if Day == Date:
                         Store_time = '{0}-{1}-{2}'.format(year, month, day)
+                        timeArray = time.strptime(Store_time, "%Y-%m-%d")
+                        timeStamp = int(time.mktime(timeArray))
+                        #漲跌價差x,+,-
+                        pattern = r'-*[0-9]*\.[0-9]*'
+                        search = re.search(pattern,data[7])
+                        data[7] = search.group()
                         row = [
                             Store_time, # 日期
+                            str(timeStamp), #時間戳
                             data[1], # 成交股數
                             data[2], # 成交金額
                             data[3], # 開盤價
@@ -180,7 +195,7 @@ def Get_Stock_Data_by_Day(Day, Stock_ID):
                         ]
                         #print(row)
                         clean_row(row)
-                        print(row)
+                        #print(row)
                         record(Stock_ID, row)
 #每日更新，去讀取資料夾內的StockID更新
 def DailyUpdate():
