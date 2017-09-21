@@ -1,7 +1,7 @@
 '''
 參考https://github.com/jaungiers/LSTM-Neural-Network-for-Time-Series-Prediction
 '''
-## -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #-*- coding: cp950 -*-
 import os
 import time
