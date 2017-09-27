@@ -31,7 +31,7 @@ for i in range(len(PredictInformation)):
     NormalizeData = lstm.NormaliseWindows(DataSet)
     #切割預測資料
     x_predict = lstm.SplitDatatoPredict(DataSet, ColumnList, NumOfPredictDay)
-    original_value = x_predict[0][0][len(ColumnList) - 1]
+    original_value = x_predict[0][0][len(ColumnList) - 3]
     x_predict = lstm.NormaliseWindows(x_predict)
     
     model = keras.models.load_model("../model/" + str(i) + '.h5')
@@ -52,15 +52,6 @@ for i in range(len(PredictInformation)):
             
     StoreData = StoreData.applymap(lambda x: (x + 1) * original_value)        
     StoreData.to_pickle('../predict/' + PredictCSVName[:-4] + '.pickle')
-    StoreData.to_json('../json/' + PredictCSVName[:-4] + '.json')
-    StoreData.to_csv('../predict/' + PredictCSVName)
     print('Predict duration (s) : ',time.time() - forloop_start_time)
 
 print('Total predict duration (s) : ',time.time() - global_start_time)
-
-import os
-
-DataList = os.listdir('../data')
-for CSV in DataList[0:-2]:
-    CSVFile = pd.read_csv('../data/' + CSV)
-    CSVFile.to_json('../json/' + CSV[:-4] + '.json')
